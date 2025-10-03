@@ -9,7 +9,7 @@ export const metadata = {
   openGraph: {
     title: 'Sflix | Watch Movie Stream Movies and Tv Series Free',
     description: 'Sflix is your one-stop destination for free movies, TV shows, and web series. Download thousands of titles in HD quality, with unlimited access to the latest blockbusters and trending series. Start your free entertainment journey today! ',
-    url: 'https://sflix-watch.vercel.app',
+    url: 'https://sflix-watch.netlify.app',
     siteName: 'Sflix',
     images: [
       {
@@ -54,7 +54,7 @@ export default function RootLayout({ children }) {
             </main>
             <footer className="w-full max-w-7xl mx-auto px-4 py-8">
               {/* Tempatkan div Native Banner di sini, sebelum Footer */}
-              <div id="container-ea3c0571018b75bccd0d223d5ef1ff4c"></div>
+              <div id="container-cdc27ff5e15225e2da400af202e94c4a"></div>
               <Footer />
             </footer>
           </div>

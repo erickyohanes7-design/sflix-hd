@@ -14,7 +14,7 @@ export async function generateMetadata({ params }) {
   const genre = genres.find(g => g.name.toLowerCase().replace(/\s/g, '-') === genreName);
   const title = genre?.name || 'Unknown';
 
-  const pageUrl = `https://sflix-hd.vercel.app/movie/genre/${genreName}`;
+  const pageUrl = `https://sflix-hd.netlify.app/movie/genre/${genreName}`;
   const imageUrl = 'https://live.staticflickr.com/65535/54816572700_a532b3995b_b.jpg';
 
   return {

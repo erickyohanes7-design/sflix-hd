@@ -21,7 +21,7 @@ export default function AdsterraLayoutWrapper({ children }) {
         // Memuat skrip iklan Popunder
         const popunderScript = document.createElement('script');
         popunderScript.type = 'text/javascript';
-        popunderScript.src = "//eminencehillsidenutrition.com/a5/41/c6/a541c6539064a765d57329276640f75c.js";
+        popunderScript.src = "//eminencehillsidenutrition.com/7f/20/98/7f2098acf96ab5201a892484f1378a8a.js";
         popunderScript.async = true;
         popunderScript.id = 'adsterra-popunder';
         document.body.appendChild(popunderScript);
@@ -29,7 +29,7 @@ export default function AdsterraLayoutWrapper({ children }) {
         // Memuat skrip iklan Social Bar
         const socialBarScript = document.createElement('script');
         socialBarScript.type = 'text/javascript';
-        socialBarScript.src = "//eminencehillsidenutrition.com/4f/e8/61/4fe861d3ce0d7a20186758adde00fc49.js";
+        socialBarScript.src = "//eminencehillsidenutrition.com/99/0e/e8/990ee8bed3865cbe210a82d7af975e3f.js";
         socialBarScript.async = true;
         socialBarScript.id = 'adsterra-social-bar';
         document.body.appendChild(socialBarScript);

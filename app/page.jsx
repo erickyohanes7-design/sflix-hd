@@ -13,7 +13,7 @@ export default function About() {
         <meta property="og:title" content="Sflix - Premium Free Streaming Experience" />
         <meta property="og:description" content="Experience unlimited HD movies and TV series streaming completely free. Advanced features, curated content, and seamless viewing on any device." />
         <meta property="og:image" content="https://live.staticflickr.com/65535/54812286746_f853554453_b.jpg" />
-        <meta property="og:url" content="https://sflix-hd.vercel.app/" />
+        <meta property="og:url" content="https://sflix-hd.netlify.app/" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -264,17 +264,17 @@ export default function About() {
             "@context": "https://schema.org",
             "@type": "WebSite",
             "name": "Sflix",
-            "url": "https://sflix-hd.vercel.app//",
+            "url": "https://sflix-hd.netlify.app//",
             "potentialAction": {
               "@type": "SearchAction",
-              "target": "https://sflix-hd.vercel.app//search?q={search_term_string}",
+              "target": "https://sflix-hd.netlify.app//search?q={search_term_string}",
               "query-input": "required name=search_term_string"
             },
             "description": "Free HD movie and TV series streaming platform with comprehensive database and advanced features",
             "publisher": {
               "@type": "Organization",
               "name": "Sflix",
-              "url": "https://sflix-hd.vercel.app//"
+              "url": "https://sflix-hd.netlify.app//"
             }
           })
         }}

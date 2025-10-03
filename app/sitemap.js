@@ -8,7 +8,7 @@ import {
   getTvSeriesByGenre
 } from '../lib/api';
 
-const BASE_URL = 'https://sflix-hd.vercel.app/';
+const BASE_URL = 'https://sflix-hd.netlify.app/';
 
 // Fungsi utilitas untuk membuat slug
 const createSlug = (name, year) => {
