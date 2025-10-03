@@ -1,0 +1,13 @@
+[build]
+command = "npm run build"
+publish = ".next"
+
+[[redirects]]
+from = "/movie/:id/:slug"
+to = "/movie/:id/:slug"
+status = 200
+
+[[redirects]]
+from = "/tv/:id/:slug"
+to = "/tv/:id/:slug"
+status = 200

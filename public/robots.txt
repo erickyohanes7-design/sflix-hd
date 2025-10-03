@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /movie/
+Allow: /tv-show/
+Allow: /trending
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Disallow: /*?*
+Disallow: /*?sort=
+Disallow: /*?page=
+Disallow: /*?filter=
+Crawl-delay: 1
+
+# Sitemaps
+Sitemap: https://sflix-watch.vercel.app/sitemap.xml
