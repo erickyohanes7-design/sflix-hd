@@ -1,21 +1,10 @@
 // components/MovieList.jsx
 import MediaCard from './MediaCard';
-import { checkForDuplicateTitleYear } from '../lib/api'; // ✅ Import fungsi check duplicate
 
 export default function MovieList({ movies }) {
   if (!movies || movies.length === 0) {
     return <p className="text-center text-gray-400">No Movies Found.</p>;
   }
-
-  // ✅ OPTIONAL: Check duplicates jika diperlukan (uncomment jika ingin aktif)
-  // useEffect(() => {
-  //   const checkDuplicates = async () => {
-  //     if (movies && movies.length > 0) {
-  //       await checkForDuplicateTitleYear(movies);
-  //     }
-  //   };
-  //   checkDuplicates();
-  // }, [movies]);
 
   // Buat key yang benar-benar unik dengan kombinasi ID dan timestamp
   const generateUniqueKey = (item, index) => {

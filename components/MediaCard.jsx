@@ -1,28 +1,29 @@
 // components/MediaCard.jsx
+
 "use client";
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { generateSlug, checkForDuplicateTitleYear } from '../lib/api';
+import { useState } from 'react';
+
+// Fungsi utilitas untuk membuat slug dari item media
+const createSlug = (item) => {
+  const title = item.title || item.name;
+  if (!title) return '';
+
+  const baseSlug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').trim();
+
+  let year = '';
+  if (item.release_date) {
+    year = item.release_date.substring(0, 4);
+  } else if (item.first_air_date) {
+    year = item.first_air_date.substring(0, 4);
+  }
+  return `${baseSlug}-${year}`;
+};
 
 export default function MediaCard({ mediaItem }) {
   const [isHovered, setIsHovered] = useState(false);
-  const [mediaSlug, setMediaSlug] = useState('');
-
-  // ✅ PERBAIKAN: Generate slug setelah component mount
-  useEffect(() => {
-    const slug = generateSlug(mediaItem);
-    setMediaSlug(slug);
-    
-    // ✅ DEBUG: Log untuk memastikan slug benar
-    console.log('🎬 MediaCard Slug Generation:', {
-      title: mediaItem.title || mediaItem.name,
-      year: mediaItem.release_date?.split('-')[0] || mediaItem.first_air_date?.split('-')[0],
-      id: mediaItem.id,
-      generatedSlug: slug
-    });
-  }, [mediaItem]);
 
   const posterPath = mediaItem.poster_path;
   const imageUrl = posterPath
@@ -42,6 +43,7 @@ export default function MediaCard({ mediaItem }) {
     year = 'N/A';
   }
 
+  const mediaSlug = createSlug(mediaItem);
   const linkHref = `/${mediaType}/${mediaSlug}`;
 
   return (
@@ -59,19 +61,16 @@ export default function MediaCard({ mediaItem }) {
             sizes="(max-width: 600px) 50vw, (max-width: 1200px) 25vw, 15vw"
             style={{ objectFit: 'cover' }}
             className="transition-transform duration-300 transform group-hover:scale-110"
-            priority={false}
           />
 
           {/* Overlay dan Teks yang Muncul Saat Hover */}
           <div className={`absolute inset-0 bg-black bg-opacity-70 flex flex-col justify-end p-4 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-            <h3 className="text-white text-lg font-bold line-clamp-2">
+            <h3 className="text-white text-lg font-bold">
               {title}
             </h3>
             <p className="text-gray-300 text-sm font-light">
               ({year})
             </p>
-            {/* ✅ DEBUG: Tampilkan ID untuk troubleshooting */}
-            <p className="text-gray-400 text-xs mt-1">ID: {mediaItem.id}</p>
           </div>
         </div>
       </Link>

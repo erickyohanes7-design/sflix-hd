@@ -1,71 +1,87 @@
-// components/layout/Footer.jsx
-
-import { FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaRss, FaVideo, FaHeart } from 'react-icons/fa';
+// Footer.jsx (Enhanced)
+import { FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaRss, FaVideo, FaHeart, FaStar, FaShieldAlt, FaAward } from 'react-icons/fa';
 
 export default function Footer() {
   const year = new Date().getFullYear();
   
   return (
-    <footer className="bg-gradient-to-b from-slate-900 to-black text-gray-400 py-12 shadow-2xl">
+    <footer className="bg-gradient-to-b from-slate-900 via-purple-900/20 to-black text-gray-400 py-16 shadow-2xl border-t border-gray-800/50">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-          <div className="flex items-center mb-6 md:mb-0">
-           <FaVideo className="text-blue-500 text-3xl mr-3" />
-           <a href="https://sflix-watch.vercel.app" className="text-2xl font-bold text-white hover:text-red-600">Sflix</a>
+        <div className="flex flex-col lg:flex-row justify-between items-center mb-12 gap-8">
+          <div className="flex items-center group">
+            <div className="relative">
+              <FaVideo className="text-blue-500 text-4xl mr-4 group-hover:text-yellow-400 transition-colors duration-500 group-hover:scale-110 transform-gpu" />
+              <div className="absolute inset-0 bg-yellow-400 rounded-full blur-md group-hover:blur-lg opacity-50 group-hover:opacity-70 transition-all duration-500"></div>
+            </div>
+            <a href="https://sflix-hd.vercel.app" className="text-3xl font-black text-white hover:text-transparent bg-gradient-to-r from-blue-400 to-purple-400 hover:from-orange-400 hover:to-yellow-400 bg-clip-text transition-all duration-500">
+              Sflix
+            </a>
           </div>
           
-          <div className="flex space-x-6">
-            <a href="https://facebook.com" className="text-gray-400 hover:text-blue-400 transition-colors transform hover:scale-110" target="_blank" rel="noopener noreferrer">
-              <FaFacebook size={24} />
+          <div className="flex space-x-8">
+            <a href="https://facebook.com" className="text-gray-400 hover:text-blue-400 transition-all duration-500 transform hover:scale-125 hover:rotate-12" target="_blank" rel="noopener noreferrer">
+              <FaFacebook size={28} />
             </a>
-            <a href="https://twitter.com" className="text-gray-400 hover:text-blue-400 transition-colors transform hover:scale-110" target="_blank" rel="noopener noreferrer">
-              <FaTwitter size={24} />
+            <a href="https://twitter.com" className="text-gray-400 hover:text-blue-400 transition-all duration-500 transform hover:scale-125 hover:rotate-12" target="_blank" rel="noopener noreferrer">
+              <FaTwitter size={28} />
             </a>
-            <a href="https://instagram.com" className="text-gray-400 hover:text-blue-400 transition-colors transform hover:scale-110" target="_blank" rel="noopener noreferrer">
-              <FaInstagram size={24} />
+            <a href="https://instagram.com" className="text-gray-400 hover:text-pink-400 transition-all duration-500 transform hover:scale-125 hover:rotate-12" target="_blank" rel="noopener noreferrer">
+              <FaInstagram size={28} />
             </a>
-            <a href="https://youtube.com" className="text-gray-400 hover:text-blue-400 transition-colors transform hover:scale-110" target="_blank" rel="noopener noreferrer">
-              <FaYoutube size={24} />
+            <a href="https://youtube.com" className="text-gray-400 hover:text-red-400 transition-all duration-500 transform hover:scale-125 hover:rotate-12" target="_blank" rel="noopener noreferrer">
+              <FaYoutube size={28} />
             </a>
           </div>
         </div>
         
-        <div className="mb-8 text-center">
-          <h3 className="text-white text-xl font-semibold mb-4">Stay Updated with the Latest Releases</h3>
-          <div className="max-w-md mx-auto flex">
+        <div className="mb-12 text-center max-w-2xl mx-auto">
+          <h3 className="text-white text-2xl font-bold mb-6 flex items-center justify-center gap-3">
+            <FaStar className="text-yellow-400" />
+            Stay Updated with Latest Releases
+            <FaStar className="text-yellow-400" />
+          </h3>
+          <div className="max-w-md mx-auto flex shadow-2xl rounded-2xl overflow-hidden">
             <input 
               type="email" 
               placeholder="Enter your email address" 
-              className="bg-gray-800 text-white text-sm rounded-l-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-700"
+              className="bg-gray-800 text-white text-lg px-6 py-4 w-full focus:outline-none focus:ring-4 focus:ring-blue-500/50 border border-gray-700"
             />
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-r-lg transition-colors text-sm font-medium">
+            <button className="bg-gradient-to-r from-blue-600 to-purple-700 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 transition-all duration-500 text-lg font-bold hover:scale-105 transform-gpu">
               Subscribe
             </button>
           </div>
+          <p className="text-gray-500 mt-4 text-sm">Get notified about new movie releases and exclusive content</p>
         </div>
         
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="text-center md:text-left mb-4 md:mb-0">
-            <p className="text-sm">&copy; {year} Sflix. All rights reserved.</p>
-            <p className="text-xs mt-2 text-gray-500">
-              Made with <FaHeart className="inline text-red-500" /> by movie lovers
+        <div className="border-t border-gray-800 pt-12 flex flex-col lg:flex-row justify-between items-center gap-8">
+          <div className="text-center lg:text-left">
+            <p className="text-lg">&copy; {year} Sflix. All rights reserved.</p>
+            <p className="text-sm mt-3 text-gray-500 flex items-center justify-center lg:justify-start gap-2">
+              Made with <FaHeart className="text-red-500 animate-pulse" /> by movie enthusiasts worldwide
             </p>
           </div>
           
-          <div className="flex flex-wrap justify-center space-x-6 text-sm">
-            <a href="/privacy-policy" className="text-gray-400 hover:text-blue-400 transition-colors mb-2 md:mb-0">Privacy Policy</a>
-            <a href="/terms-of-service" className="text-gray-400 hover:text-blue-400 transition-colors mb-2 md:mb-0">Terms of Service</a>
-            <a href="/dmca" className="text-gray-400 hover:text-blue-400 transition-colors mb-2 md:mb-0">DMCA</a>
-            <a href="/contact" className="text-gray-400 hover:text-blue-400 transition-colors">Contact Us</a>
+          <div className="flex flex-wrap justify-center gap-8 text-lg">
+            <a href="/privacy-policy" className="text-gray-400 hover:text-blue-400 transition-all duration-300 hover:scale-105 flex items-center gap-2">
+              <FaShieldAlt className="text-green-400" />
+              Privacy Policy
+            </a>
+            <a href="/terms-of-service" className="text-gray-400 hover:text-blue-400 transition-all duration-300 hover:scale-105 flex items-center gap-2">
+              <FaAward className="text-yellow-400" />
+              Terms of Service
+            </a>
+            <a href="/contact" className="text-gray-400 hover:text-blue-400 transition-all duration-300 hover:scale-105 flex items-center gap-2">
+              Contact Us
+            </a>
           </div>
         </div>
         
-        <div className="mt-8 pt-6 border-t border-gray-800 text-center">
-          <p className="text-sm">
+        <div className="mt-12 pt-8 border-t border-gray-800 text-center">
+          <p className="text-lg mb-4">
             Powered by{' '}
             <a
               href="https://www.themoviedb.org/"
-              className="text-blue-400 hover:text-blue-300 transition-colors font-medium"
+              className="text-blue-400 hover:text-blue-300 transition-colors font-bold"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -74,20 +90,20 @@ export default function Footer() {
             &{' '}
             <a
               href="https://nextjs.org"
-              className="text-blue-400 hover:text-blue-300 transition-colors font-medium"
+              className="text-blue-400 hover:text-blue-300 transition-colors font-bold"
               target="_blank"
               rel="noopener noreferrer"
             >
               Next.js
             </a>
           </p>
-          <p className="text-xs text-gray-500 mt-2">
-            Disclaimer: Sflix does not host any videos or content on its server. All content is provided by non-affiliated third parties.
+          <p className="text-sm text-gray-500 mt-3 max-w-2xl mx-auto">
+            Disclaimer: Sflix is a comprehensive movie database that provides information and reviews. We do not host any videos or content on our servers. All content is provided by legitimate third-party services.
           </p>
           
-          <div className="mt-4 flex items-center justify-center text-sm text-gray-400 hover:text-blue-400 transition-colors">
-            <FaRss className="mr-2" />
-            <a href="/rss" className="hover:text-blue-400">RSS Feed</a>
+          <div className="mt-6 flex items-center justify-center text-lg text-gray-400 hover:text-orange-400 transition-colors duration-300">
+            <FaRss className="mr-3 text-orange-400" />
+            <a href="/rss" className="hover:text-orange-400 font-bold">RSS Feed</a>
           </div>
         </div>
       </div>

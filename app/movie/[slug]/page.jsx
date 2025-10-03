@@ -11,9 +11,6 @@ import {
   getSimilarMovies,
   getMoviesByCategory,
   getMovieGenres,
-  fetchMediaItem,
-  generateSlug,
-  checkForDuplicateTitleYear,
 } from '../../../lib/api';
 import MovieList from '../../../components/MovieList';
 import TvSeriesList from '../../../components/TvSeriesList';
@@ -22,12 +19,21 @@ const CATEGORIES = ['now_playing', 'popular', 'top_rated', 'upcoming'];
 
 // Utility function to create a slug from a movie title
 const createSlug = (item) => {
-  return generateSlug(item);
+  const title = item.title;
+  if (!title) return '';
+  const baseSlug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').trim();
+
+  let year = '';
+  if (item.release_date) {
+    year = item.release_date.substring(0, 4);
+  }
+  return `${baseSlug}-${year}`;
 };
 
 // --- BAGIAN METADATA API ---
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
+  const { slug } = await params; // PERBAIKAN DI SINI
+  let movieData = null;
 
   // Cek jika slug adalah kategori
   if (CATEGORIES.includes(slug)) {
@@ -50,18 +56,34 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  // ✅ PERBAIKAN: Gunakan fetchMediaItem untuk handle semua format slug
-  let movieData = null;
-  try {
-    movieData = await fetchMediaItem(slug, 'movie');
-  } catch (error) {
-    console.error('Error fetching movie data for metadata:', error);
+  // Logika untuk halaman detail film
+  const id = parseInt(slug, 10);
+  const slugParts = slug.split('-');
+  const lastPart = slugParts[slugParts.length - 1];
+  const slugYear = /^\d{4}$/.test(lastPart) ? lastPart : null;
+  const slugTitle = slugYear ? slugParts.slice(0, -1).join('-') : slug;
+
+  if (!isNaN(id) && slugParts.length === 1) {
+    movieData = await getMovieById(id);
+  } else {
+    const searchResults = await searchMoviesAndTv(slugTitle.replace(/-/g, ' '));
+    let matchingMovie = searchResults.find(item => {
+      const itemName = item.title?.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+      if (!itemName) return false;
+      const slugTitleClean = slugTitle.toLowerCase().replace(/-/g, '').replace(/[^a-z0-9\s]/g, '');
+      const titleMatch = itemName === slugTitleClean || itemName.replace(/\s/g, '') === slugTitleClean;
+      const yearMatch = !slugYear || (item.release_date && item.release_date.substring(0, 4) === slugYear);
+      return item.media_type === 'movie' && titleMatch && yearMatch;
+    });
+    if (matchingMovie) {
+      movieData = await getMovieById(matchingMovie.id);
+    }
   }
 
-  // ✅ PERBAIKAN: Tambah validasi lebih ketat
-  if (!movieData || !movieData.title) {
+  // Jika data tidak ditemukan, kembalikan metadata dasar
+  if (!movieData) {
     return {
-      title: 'Sflix - Movie Not Found',
+      title: 'Sflix',
       description: 'Find your favorite movies to stream.',
     };
   }
@@ -70,23 +92,25 @@ export async function generateMetadata({ params }) {
     ? `https://image.tmdb.org/t/p/original${movieData.backdrop_path}`
     : movieData.poster_path
       ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}`
-      : `https://placehold.co/1200x630/1f2937/d1d5db?text=${encodeURIComponent(movieData.title)}`;
-
+      : `https://placehold.co/1200x630/1f2937/d1d5db?text=${movieData.title.replace(/\s/g, '+')}`;
+  
+  const socialImageWidth = movieData.backdrop_path ? 1200 : movieData.poster_path ? 500 : 1200;
+  const socialImageHeight = movieData.backdrop_path ? 630 : movieData.poster_path ? 750 : 630;
   const socialImageAlt = `${movieData.title} poster`;
 
   return {
     title: `Sflix - ${movieData.title}`,
-    description: movieData.overview || `Watch ${movieData.title} on Sflix`,
+    description: movieData.overview || `Detailed information for movie ${movieData.title}`,
     openGraph: {
       title: movieData.title,
-      description: movieData.overview || `Watch ${movieData.title} on Sflix`,
-      url: `https://sflix-watch.vercel.app/movie/${slug}`,
+      description: movieData.overview || `Detailed information for movie ${movieData.title}`,
+      url: `https://sflix-hd.vercel.app/movie/${slug}`,
       siteName: 'Sflix',
       images: [
         {
           url: socialImage,
-          width: 1200,
-          height: 630,
+          width: socialImageWidth,
+          height: socialImageHeight,
           alt: socialImageAlt,
         },
       ],
@@ -98,7 +122,7 @@ export async function generateMetadata({ params }) {
       site: '@WatchStream123',
       creator: '@WatchStream123',
       title: movieData.title,
-      description: movieData.overview || `Watch ${movieData.title} on Sflix`,
+      description: movieData.overview || `Detailed information for movie ${movieData.title}`,
       images: [socialImage],
       imageAlt: socialImageAlt,
     },
@@ -108,17 +132,11 @@ export async function generateMetadata({ params }) {
 
 // Main component
 export default async function MoviePage({ params }) {
-  const { slug } = await params;
+  const { slug } = await params; // PERBAIKAN DI SINI
 
   // Cek jika slug adalah kategori
   if (CATEGORIES.includes(slug)) {
     const movies = await getMoviesByCategory(slug);
-    
-    // ✅ Check duplicates untuk kategori movies
-    if (movies && movies.length > 0) {
-      await checkForDuplicateTitleYear(movies);
-    }
-    
     const title = slug.replace(/_/g, ' ').toUpperCase();
 
     return (
@@ -139,14 +157,9 @@ export default async function MoviePage({ params }) {
   const genreMatch = slug.match(/^genre-(\d+)$/);
   if (genreMatch) {
     const genreId = genreMatch[1];
-    const genres = await getMovieGenres();
-    const genreName = genres.find(g => g.id == genreId)?.name || 'Unknown';
+    const movies = await getMovieGenres();
+    const genreName = movies.find(g => g.id == genreId)?.name || 'Unknown';
     const moviesByGenre = await getMoviesByGenre(genreId);
-    
-    // ✅ Check duplicates untuk genre movies
-    if (moviesByGenre && moviesByGenre.length > 0) {
-      await checkForDuplicateTitleYear(moviesByGenre);
-    }
 
     return (
       <div className="container mx-auto px-4 py-8">
@@ -163,66 +176,60 @@ export default async function MoviePage({ params }) {
   }
 
   // --- Logika untuk halaman detail film ---
-  // ✅ PERBAIKAN: Gunakan fetchMediaItem yang baru
   let movieData = null;
-  try {
-    movieData = await fetchMediaItem(slug, 'movie');
-  } catch (error) {
-    console.error('Error fetching movie data:', error);
+  const id = parseInt(slug, 10);
+
+  const slugParts = slug.split('-');
+  const lastPart = slugParts[slugParts.length - 1];
+  const slugYear = /^\d{4}$/.test(lastPart) ? lastPart : null;
+  const slugTitle = slugYear ? slugParts.slice(0, -1).join('-') : slug;
+
+  if (!isNaN(id) && slugParts.length === 1) {
+    movieData = await getMovieById(id);
+  } else {
+    const searchResults = await searchMoviesAndTv(slugTitle.replace(/-/g, ' '));
+    let matchingMovie = searchResults.find(item => {
+      const itemName = item.title?.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+      if (!itemName) return false;
+      const slugTitleClean = slugTitle.toLowerCase().replace(/-/g, '').replace(/[^a-z0-9\s]/g, '');
+      const titleMatch = itemName === slugTitleClean || itemName.replace(/\s/g, '') === slugTitleClean;
+      const yearMatch = !slugYear || (item.release_date && item.release_date.substring(0, 4) === slugYear);
+      return item.media_type === 'movie' && titleMatch && yearMatch;
+    });
+
+    if (matchingMovie) {
+      movieData = await getMovieById(matchingMovie.id);
+    }
   }
 
-  // ✅ PERBAIKAN: Tambah validasi lengkap untuk movieData
-  if (!movieData || !movieData.id || !movieData.title) {
-    console.error('Movie data not found or incomplete:', movieData);
+  if (!movieData) {
     notFound();
   }
 
-  // ✅ PERBAIKAN: Pastikan data essential ada dengan fallback
-  const safeMovieData = {
-    ...movieData,
-    title: movieData.title || 'Unknown Title',
-    overview: movieData.overview || 'Synopsis not available.',
-    vote_average: movieData.vote_average || 0,
-    release_date: movieData.release_date || '',
-    genres: movieData.genres || [],
-    status: movieData.status || 'Unknown',
-    homepage: movieData.homepage || '#'
-  };
-
   const [videos, credits, reviews, similarMovies] = await Promise.all([
-    getMovieVideos(safeMovieData.id),
-    getMovieCredits(safeMovieData.id),
-    getMovieReviews(safeMovieData.id),
-    getSimilarMovies(safeMovieData.id),
+    getMovieVideos(movieData.id),
+    getMovieCredits(movieData.id),
+    getMovieReviews(movieData.id),
+    getSimilarMovies(movieData.id),
   ]);
 
-  // ✅ Check duplicates untuk similar movies
-  if (similarMovies && similarMovies.length > 0) {
-    await checkForDuplicateTitleYear(similarMovies);
-  }
-
-  const backdropUrl = safeMovieData.backdrop_path ? `https://image.tmdb.org/t/p/original${safeMovieData.backdrop_path}` : null;
-  const posterUrl = safeMovieData.poster_path ? `https://image.tmdb.org/t/p/w500${safeMovieData.poster_path}` : null;
-
-  // ✅ PERBAIKAN: Pastikan alt text selalu ada
-  const imageAlt = safeMovieData.title;
-  const backdropAlt = `${safeMovieData.title} backdrop`;
+  const backdropUrl = movieData.backdrop_path ? `https://image.tmdb.org/t/p/original${movieData.backdrop_path}` : null;
+  const posterUrl = movieData.poster_path ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}` : null;
 
   const trailer = videos && videos.length > 0 ? videos.find((video) => video.site === 'YouTube' && video.type === 'Trailer') : null;
-  const cast = credits?.cast?.slice(0, 10) || [];
-  const crew = credits?.crew?.filter(member => ['Director', 'Writer', 'Screenplay'].includes(member.job)).slice(0, 5) || [];
+  const cast = credits.cast.slice(0, 10);
+  const crew = credits.crew.filter(member => ['Director', 'Writer', 'Screenplay'].includes(member.job)).slice(0, 5);
   const userReviews = reviews ? reviews.slice(0, 5) : [];
 
   return (
     <div className="min-h-screen bg-slate-900 text-white pb-8">
       {/* Meta OG & Twitter sekarang dikelola oleh generateMetadata */}
-      
       {/* Backdrop Section */}
       {backdropUrl && (
         <div className="relative h-64 sm:h-96 md:h-[500px] overflow-hidden">
           <Image
             src={backdropUrl}
-            alt={backdropAlt}
+            alt={`${movieData.title} backdrop`}
             fill
             style={{ objectFit: 'cover' }}
             className="w-full h-full object-cover rounded-lg shadow-xl"
@@ -238,7 +245,7 @@ export default async function MoviePage({ params }) {
           <div className="w-full md:w-1/3 flex-shrink-0 mb-6 md:mb-0">
             <Image
               src={posterUrl || `https://placehold.co/500x750/1f2937/d1d5db?text=Poster+Not+Available`}
-              alt={imageAlt}
+              alt={movieData.title}
               width={500}
               height={750}
               className="w-full h-auto rounded-lg shadow-xl"
@@ -250,37 +257,37 @@ export default async function MoviePage({ params }) {
           {/* Details Section */}
           <div className="flex-1">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-400 mb-2">
-              {safeMovieData.title}
+              {movieData.title}
             </h1>
             <p className="text-gray-300 text-lg sm:text-xl mb-4 italic">
-              {safeMovieData.tagline}
+              {movieData.tagline}
             </p>
             <div className="flex items-center space-x-4 mb-4">
               <span className="flex items-center bg-blue-600 rounded-full px-3 py-1 text-sm font-semibold text-white">
                 <FaStar className="text-yellow-400 mr-1" />
-                {safeMovieData.vote_average.toFixed(1)} / 10
+                {movieData.vote_average.toFixed(1)} / 10
               </span>
               <span className="text-gray-400 text-sm">
-                {safeMovieData.release_date?.substring(0, 4)}
+                {movieData.release_date?.substring(0, 4)}
               </span>
               <span className="text-gray-400 text-sm">
-                {safeMovieData.runtime ? `${Math.floor(safeMovieData.runtime / 60)}h ${safeMovieData.runtime % 60}m` : 'N/A'}
+                {movieData.runtime ? `${Math.floor(movieData.runtime / 60)}h ${movieData.runtime % 60}m` : 'N/A'}
               </span>
             </div>
 
             <h2 className="text-2xl font-bold mt-6 mb-2">Synopsis</h2>
             <p className="text-gray-300 text-justify mb-6">
-              {safeMovieData.overview}
+              {movieData.overview || 'Synopsis not available.'}
             </p>
 
             <div className="grid grid-cols-2 gap-4 text-sm text-gray-400 mb-6">
               <div>
                 <p>
                   <strong>Genre:</strong>{' '}
-                  {safeMovieData.genres.map((genre) => genre.name).join(', ') || 'N/A'}
+                  {movieData.genres?.map((genre) => genre.name).join(', ')}
                 </p>
                 <p>
-                  <strong>Status:</strong> {safeMovieData.status}
+                  <strong>Status:</strong> {movieData.status}
                 </p>
               </div>
               <div>
@@ -289,14 +296,7 @@ export default async function MoviePage({ params }) {
                   {crew.find(member => member.job === 'Director')?.name || 'N/A'}
                 </p>
                 <p>
-                  <strong>Website:</strong>{' '}
-                  {safeMovieData.homepage !== '#' ? (
-                    <a href={safeMovieData.homepage} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
-                      {safeMovieData.homepage}
-                    </a>
-                  ) : (
-                    'N/A'
-                  )}
+                  <strong>Website:</strong> <a href={movieData.homepage} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">{movieData.homepage}</a>
                 </p>
               </div>
             </div>
@@ -345,7 +345,7 @@ export default async function MoviePage({ params }) {
               <iframe
                 className="w-full aspect-video rounded-xl shadow-lg"
                 src={`https://www.youtube.com/embed/${trailer.key}`}
-                title={`${safeMovieData.title} Trailer`}
+                title="YouTube video player"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -392,7 +392,7 @@ export default async function MoviePage({ params }) {
                     <div className="relative w-full h-auto rounded-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 shadow-lg">
                       <Image
                         src={getImageUrl(item.poster_path)}
-                        alt={item.title || 'Movie poster'}
+                        alt={item.title}
                         width={200}
                         height={300}
                         className="w-full h-auto object-cover rounded-lg"
@@ -400,7 +400,7 @@ export default async function MoviePage({ params }) {
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col justify-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <h3 className="text-xs md:text-sm font-semibold text-white truncate mb-1">
-                          {item.title || 'Unknown Title'}
+                          {item.title}
                         </h3>
                         {item.release_date && (
                           <span className="text-[10px] md:text-xs text-gray-400">
@@ -419,7 +419,7 @@ export default async function MoviePage({ params }) {
 		{/* Bottom Stream Button */}
         <div className="mt-12 text-center">
              <a href={`/movie/${slug}/stream`}>
-              <button className="bg-blue-700 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-lg text-xl transition-transform transform hover:scale-105 shadow-lg">
+              <button className="bg-blue-700 hover:bg-green-700 text-white font-bold py-4 px-10 rounded-lg text-xl transition-transform transform hover:scale-105 shadow-lg">
                 🎬 Stream Now
               </button>
             </a>

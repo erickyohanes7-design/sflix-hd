@@ -13,4 +13,4 @@ Disallow: /*?filter=
 Crawl-delay: 1
 
 # Sitemaps
-Sitemap: https://sflix-watch.vercel.app/sitemap.xml
+Sitemap: https://sflix-hd.vercel.app/sitemap.xml
