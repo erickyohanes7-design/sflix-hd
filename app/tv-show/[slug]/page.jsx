@@ -54,12 +54,12 @@ export async function generateMetadata({ params }) {
 
   if (genreSlugMap.has(processedSlug)) {
     const genre = genreSlugMap.get(processedSlug);
-    return { title: `Sflix - ${genre.name} TV Series` };
+    return { title: `SFlix - ${genre.name} TV Series` };
   }
 
   if (CATEGORIES.includes(slug)) {
     const title = slug.replace(/_/g, ' ').toUpperCase();
-    return { title: `Sflix - ${title} TV Series` };
+    return { title: `SFlix - ${title} TV Series` };
   }
 
   // Logika untuk mengambil data TV show untuk metadata detail
@@ -98,13 +98,13 @@ export async function generateMetadata({ params }) {
   const socialImageAlt = `${tvShowData.name} poster`;
 
   return {
-    title: `Sflix - ${tvShowData.name}`,
+    title: `SFlix - ${tvShowData.name}`,
     description: tvShowData.overview,
     openGraph: {
       title: tvShowData.name,
       description: tvShowData.overview,
-      url: `https://sflix-hd.vercel.app/tv-show/${slug}`,
-      siteName: 'Sflix',
+      url: `https://sflix-hd.netlify.app/tv-show/${slug}`,
+      siteName: 'SFlix',
       images: [{ url: socialImage, width: 1200, height: 630, alt: socialImageAlt }],
       locale: 'en_US',
       type: 'website',

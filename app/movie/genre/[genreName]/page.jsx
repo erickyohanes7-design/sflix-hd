@@ -18,13 +18,13 @@ export async function generateMetadata({ params }) {
   const imageUrl = 'https://live.staticflickr.com/65535/54816572700_a532b3995b_b.jpg';
 
   return {
-    title: `Sflix - ${title} Movies`,
-    description: `Find and watch the best ${title} movies for free on Sflix.`,
+    title: `SFlix - ${title} Movies`,
+    description: `Find and watch the best ${title} movies for free on SFlix.`,
     openGraph: {
-      title: `Sflix - ${title} Movies`,
-      description: `Find and watch the best ${title} movies for free on Sflix.`,
+      title: `SFlix - ${title} Movies`,
+      description: `Find and watch the best ${title} movies for free on SFlix.`,
       url: pageUrl,
-      siteName: 'Sflix',
+      siteName: 'SFlix',
       images: [
         {
           url: imageUrl,
@@ -40,8 +40,8 @@ export async function generateMetadata({ params }) {
       card: 'summary_large_image',
       site: '@WatchStream123',
       creator: '@WatchStream123',
-      title: `Sflix - ${title} Movies`,
-      description: `Find and watch the best ${title} movies for free on Sflix.`,
+      title: `SFlix - ${title} Movies`,
+      description: `Find and watch the best ${title} movies for free on SFlix.`,
       images: [imageUrl],
     },
     other: {

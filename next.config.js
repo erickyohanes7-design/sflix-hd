@@ -13,9 +13,10 @@ const nextConfig = {
         hostname: 'placehold.co',
         pathname: '/**',
       },
+      // PERBAIKAN DI SINI:
       {
         protocol: 'https',
-        hostname: 'via.placeholder.com',
+        hostname: 'via.placeholder.com',  // ← tempat.com bukan tempat.co
         pathname: '/**',
       }
     ],

@@ -1,17 +1,18 @@
+// components/layout/Navbar.jsx
+
 "use client";
 
 import Link from 'next/link';
-import { FaVideo, FaChevronDown, FaBars, FaTimes, FaExclamationTriangle, FaFire, FaStar, FaPlayCircle } from 'react-icons/fa';
+import { FaVideo, FaChevronDown, FaBars, FaTimes, FaUser, FaCalendar, FaTrophy } from 'react-icons/fa';
 import { getMovieGenres, getTvSeriesGenres } from '../../lib/api';
 import SearchBar from '../SearchBar';
 import { useEffect, useState } from 'react';
 
 // Reusable class for dropdown items for consistency
-const dropdownItemClass = "block w-full text-left px-4 py-3 text-sm text-gray-200 hover:bg-gradient-to-r hover:from-red-600 hover:to-purple-700 hover:text-white transition-all duration-300 rounded-md";
-const subDropdownItemClass = "block w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-700 hover:text-white transition-all duration-300 rounded";
+const dropdownItemClass = "block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-red-800 hover:text-white transition-colors duration-200";
 
 // Reusable class for sub-dropdown triggers
-const subDropdownTriggerClass = "flex justify-between items-center w-full px-4 py-3 text-sm text-gray-200 hover:bg-gradient-to-r hover:from-blue-700 hover:to-purple-800 cursor-pointer rounded-md";
+const subDropdownTriggerClass = "flex justify-between items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-blue-700 cursor-pointer";
 
 // Utility function to create a slug from a genre name
 const createSlug = (name) => {
@@ -19,7 +20,7 @@ const createSlug = (name) => {
 };
 
 // Define DropdownMenu component outside of Navbar
-const DropdownMenu = ({ title, categories, genres, genrePathPrefix, icon: Icon }) => {
+const DropdownMenu = ({ title, categories, genres, genrePathPrefix }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isGenresOpen, setIsGenresOpen] = useState(false);
   let timeoutId;
@@ -32,10 +33,11 @@ const DropdownMenu = ({ title, categories, genres, genrePathPrefix, icon: Icon }
   const handleMouseLeave = () => {
     timeoutId = setTimeout(() => {
       setIsOpen(false);
-      setIsGenresOpen(false);
-    }, 150);
+      setIsGenresOpen(false); // Pastikan sub-dropdown juga tertutup
+    }, 100); // Penundaan 100ms
   };
 
+  // Handler khusus untuk sub-dropdown Genres
   const handleGenresMouseEnter = () => {
     setIsGenresOpen(true);
   };
@@ -51,25 +53,21 @@ const DropdownMenu = ({ title, categories, genres, genrePathPrefix, icon: Icon }
       onMouseLeave={handleMouseLeave}
     >
       <button
-        className="flex items-center text-white hover:text-yellow-300 transition-all duration-300 font-semibold px-3 py-2 rounded-lg hover:bg-white/10 group"
+        className="flex items-center text-white hover:text-green-600 transition-colors duration-200 font-bold"
       >
-        {Icon && <Icon className="mr-1.5 text-lg group-hover:scale-110 transition-transform" />}
-        {title} <FaChevronDown className={`ml-1.5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        {title} <FaChevronDown className={`ml-1 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && (
-        <div className="absolute left-0 mt-3 w-56 bg-slate-800/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-xl shadow-2xl border border-slate-700/50 z-20">
-          <div className="p-2">
+        <div className="absolute left-0 mt-2 w-48 bg-slate-800 dark:bg-gray-800 rounded-md shadow-lg z-20">
+          <div className="py-1">
             {categories.map((category) => (
               <Link
                 key={category.href}
                 href={category.href}
                 className={dropdownItemClass}
-                onClick={() => setIsOpen(false)}
+                onClick={() => setIsOpen(false)} // Close parent dropdown on item click
               >
-                <span className="flex items-center">
-                  {category.icon && <category.icon className="mr-2 text-yellow-400" />}
-                  {category.label}
-                </span>
+                {category.label}
               </Link>
             ))}
             {genres.length > 0 && (
@@ -79,21 +77,17 @@ const DropdownMenu = ({ title, categories, genres, genrePathPrefix, icon: Icon }
                 onMouseLeave={handleGenresMouseLeave}
               >
                 <button className={subDropdownTriggerClass}>
-                  <span className="flex items-center">
-                    <FaPlayCircle className="mr-2 text-blue-400" />
-                    Genres
-                  </span>
-                  <FaChevronDown className={`ml1 transition-transform duration-200 ${isGenresOpen ? 'rotate-180' : ''}`} />
+                  Genres <FaChevronDown className={`ml1 transition-transform duration-200 ${isGenresOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isGenresOpen && (
-                  <div className="absolute top-0 left-full mt-0 w-56 bg-slate-800/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-xl shadow-2xl border border-slate-700/50 z-30 ml1">
-                    <div className="p-2 max-h-72 overflow-y-auto custom-scrollbar">
+                  <div className="absolute top-0 left-full mt-0 w-48 bg-slate-800 dark:bg-gray-800 rounded-md shadow-lg z-30 ml1">
+                    <div className="py-1 max-h-60 overflow-y-auto">
                       {genres.map((genre) => (
                         <Link
                           key={genre.id}
                           href={`/${genrePathPrefix}/genre/${createSlug(genre.name)}`}
-                          className={subDropdownItemClass}
-                          onClick={() => { setIsOpen(false); setIsGenresOpen(false); }}
+                          className={dropdownItemClass}
+                          onClick={() => { setIsOpen(false); setIsGenresOpen(false); }} // Close all on item click
                         >
                           {genre.name}
                         </Link>
@@ -114,9 +108,6 @@ export default function Navbar() {
   const [movieGenres, setMovieGenres] = useState([]);
   const [tvGenres, setTvGenres] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showAdultWarning, setShowAdultWarning] = useState(false);
-  const [adultContentType, setAdultContentType] = useState('');
-  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const fetchGenres = async () => {
@@ -134,241 +125,260 @@ export default function Navbar() {
     fetchGenres();
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleAdultContentClick = (type) => {
-    setAdultContentType(type);
-    setShowAdultWarning(true);
-  };
-
-  const confirmAdultContent = () => {
-    if (adultContentType === 'erotic') {
-      window.location.href = '/adult/erotic-movies';
-    } else if (adultContentType === 'adult-list') {
-      window.location.href = '/adult/adult-movies';
-    }
-    setShowAdultWarning(false);
-  };
-
-  // Movie categories with icons
-  const movieCategories = [
-    { href: "/movie/popular", label: "Popular", icon: FaFire },
-    { href: "/movie/now_playing", label: "Now Playing", icon: FaPlayCircle },
-    { href: "/movie/upcoming", label: "Upcoming", icon: FaStar },
-    { href: "/movie/top_rated", label: "Top Rated", icon: FaStar },
-  ];
-
-  // TV Series categories with icons
-  const tvCategories = [
-    { href: "/tv-show/popular", label: "Popular", icon: FaFire },
-    { href: "/tv-show/airing_today", label: "Airing Today", icon: FaPlayCircle },
-    { href: "/tv-show/on_the_air", label: "On The Air", icon: FaStar },
-    { href: "/tv-show/top_rated", label: "Top Rated", icon: FaStar },
-  ];
+  // Generate current year and decade for archives
+  const currentYear = new Date().getFullYear();
+  const recentYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  const decades = ['2020s', '2010s', '2000s', '1990s', '1980s'];
 
   return (
-    <nav className={`bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-4 sticky top-0 z-50 shadow-2xl transition-all duration-500 ${isScrolled ? 'py-3 shadow-2xl backdrop-blur-md bg-slate-900/95' : 'py-4'}`}>
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <div className="flex items-center space-x-6">
-          {/* Logo dengan efek glow */}
-          <Link href="/" className="flex items-center text-3xl font-bold transition-all duration-500 group relative">
-            <div className="relative">
-              <FaVideo className="text-white mr-3 group-hover:text-yellow-300 transition-colors duration-300 group-hover:scale-110 drop-shadow-lg" />
-              <div className="absolute inset-0 bg-yellow-400 rounded-full blur-sm group-hover:blur-md opacity-70 group-hover:opacity-90 transition-all duration-500"></div>
-            </div>
-            <span className="rainbow-text hover-glow transition-all duration-500 relative">
-              Sflix
-              <span className="absolute -inset-1 bg-gradient-to-r from-red-600 to-blue-600 rounded-lg blur opacity-30 group-hover:opacity-70 transition duration-1000 group-hover:duration-200"></span>
+    <nav className="bg-gradient-to-b from-purple-900/50 to-slate-900 py-6 p-4 sticky top-0 z-50 shadow-lg transition-colors duration-300">
+      <div className="container mx-auto flex justify-between items-center">
+        <div className="flex items-center space-x-4">
+          {/* Logo mengarah ke Trendingpage (/) - halaman about */}
+          <Link href="/" className="flex items-center text-3xl font-bold transition-colors duration-200 group">
+            <FaVideo className="text-white mr-2 group-hover:text-yellow-200 transition-colors" />
+            <span className="rainbow-text hover:text-white transition-colors">
+              SFlix
             </span>
           </Link>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
-            {/* Trending dengan icon */}
-            <Link href="/Trending" className="flex items-center text-white font-semibold hover:text-yellow-300 transition-all duration-300 px-4 py-2 rounded-lg hover:bg-white/10 group">
-              <FaFire className="mr-2 text-orange-400 group-hover:scale-110 transition-transform" />
-              Trending
-            </Link>
+          <div className="hidden md:flex items-center space-x-4">
             
+            {/* Movies Dropdown */}
             <DropdownMenu
               title="Movies"
-              categories={movieCategories}
+              categories={[
+                { href: "/movie/popular", label: "Popular" },
+                { href: "/movie/now_playing", label: "Now Playing" },
+                { href: "/movie/upcoming", label: "Upcoming" },
+                { href: "/movie/top_rated", label: "Top Rated" },
+              ]}
               genres={movieGenres}
               genrePathPrefix="movie"
-              icon={FaPlayCircle}
             />
             
+            {/* TV Series Dropdown */}
             <DropdownMenu
-              title="TV Series"
-              categories={tvCategories}
+              title="Tv Series"
+              categories={[
+                { href: "/tv-show/popular", label: "Popular" },
+                { href: "/tv-show/airing_today", label: "Airing Today" },
+                { href: "/tv-show/on_the_air", label: "On The Air" },
+                { href: "/tv-show/top_rated", label: "Top Rated" },
+              ]}
               genres={tvGenres}
               genrePathPrefix="tv-show"
-              icon={FaPlayCircle}
             />
             
-            {/* Tombol Erotic dengan efek khusus */}
-            <button
-              onClick={() => handleAdultContentClick('erotic')}
-              className="flex items-center text-white font-semibold hover:text-blue-300 transition-all duration-300 px-4 py-2 rounded-lg hover:bg-gradient-to-r hover:from-blue-900/30 hover:to-purple-900/30 group relative overflow-hidden"
-            >
-              <span className="relative z-10 flex items-center">
-                <FaStar className="mr-2 text-blue-400 group-hover:scale-110 transition-transform" />
-                Erotic
-              </span>
-              <span className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
-            </button>
+            {/* Actors/People */}
+            <Link href="/people" className="flex items-center text-white hover:text-green-600 transition-colors duration-200 font-bold">
+              <FaUser className="mr-1" /> Actors
+            </Link>
             
-            {/* Tombol Adult dengan efek khusus */}
-            <button
-              onClick={() => handleAdultContentClick('adult-list')}
-              className="flex items-center text-white font-semibold hover:text-red-300 transition-all duration-300 px-4 py-2 rounded-lg hover:bg-gradient-to-r hover:from-red-900/30 hover:to-pink-900/30 group relative overflow-hidden"
-            >
-              <span className="relative z-10 flex items-center">
-                <FaExclamationTriangle className="mr-2 text-red-400 group-hover:scale-110 transition-transform" />
-                Adult
-              </span>
-              <span className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-pink-600/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
-            </button>
+            {/* Rankings/Top Rated */}
+            <Link href="/rankings" className="flex items-center text-white hover:text-green-600 transition-colors duration-200 font-bold">
+              <FaTrophy className="mr-1" /> Rankings
+            </Link>
+            
+            {/* Archives by Year */}
+            <div className="relative group">
+              <button className="flex items-center text-white hover:text-green-600 transition-colors duration-200 font-bold">
+                <FaCalendar className="mr-1" /> Archives <FaChevronDown className="ml-1" />
+              </button>
+              <div className="absolute left-0 mt-2 w-48 bg-slate-800 rounded-md shadow-lg z-20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <div className="py-2">
+                  <div className="px-4 py-1 text-xs text-gray-400 border-b border-gray-700">By Year</div>
+                  {recentYears.map(year => (
+                    <Link
+                      key={year}
+                      href={`/movie/year/${year}`}
+                      className={dropdownItemClass}
+                    >
+                      {year}
+                    </Link>
+                  ))}
+                  <div className="px-4 py-1 text-xs text-gray-400 border-b border-gray-700 mt-2">By Decade</div>
+                  {decades.map(decade => (
+                    <Link
+                      key={decade}
+                      href={`/movie/decade/${decade.toLowerCase()}`}
+                      className={dropdownItemClass}
+                    >
+                      {decade}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
-        <div className="flex items-center space-x-4">
-          {/* Search Bar dengan width responsif */}
-          <div className="w-64 xl:w-80 hidden md:block transition-all duration-300">
+        <div className="flex items-center space-x-1">
+          {/* Search Bar */}
+          <div className="w-72 md:w-80 lg:w-96 hidden md:block">
             <SearchBar />
           </div>
           
-          {/* Mobile Menu Button dengan efek */}
+          {/* Mobile Menu Button */}
           <button 
-            className="lg:hidden text-white p-3 rounded-xl bg-slate-800/60 dark:bg-gray-700/60 hover:bg-slate-700/80 dark:hover:bg-gray-600/80 transition-all duration-300 backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50 hover:scale-105"
+            className="md:hidden text-white p-2 rounded-md bg-slate-800 dark:bg-gray-700 hover:bg-slate-700 dark:hover:bg-gray-600 transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle mobile menu"
           >
-            {isMobileMenuOpen ? <FaTimes className="text-lg" /> : <FaBars className="text-lg" />}
+            {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
           </button>
         </div>
       </div>
       
-      {/* Mobile Menu dengan backdrop blur */}
+      {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden bg-slate-900/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-slate-700/50 mt-3 p-6 rounded-b-2xl shadow-2xl">
-          <div className="mb-6">
+        <div className="md:hidden bg-slate-800 dark:bg-gray-800 p-4">
+          <div className="mb-4">
             <SearchBar />
           </div>
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-3">
             <Link 
-              href="/Trending" 
-              className="flex items-center text-white font-semibold hover:text-yellow-300 transition-all duration-300 py-3 px-4 rounded-xl hover:bg-white/10 group"
+              href="/people" 
+              className="text-white font-bold hover:text-green-600 transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <FaFire className="mr-3 text-orange-400" />
-              Trending
+              Actors & People
             </Link>
             
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                handleAdultContentClick('erotic');
-              }}
-              className="flex items-center text-white font-semibold hover:text-blue-300 transition-all duration-300 py-3 px-4 rounded-xl hover:bg-gradient-to-r hover:from-blue-900/30 hover:to-purple-900/30 text-left"
+            <Link 
+              href="/rankings" 
+              className="text-white font-bold hover:text-green-600 transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
             >
-              <FaStar className="mr-3 text-blue-400" />
-              Erotic Content
-            </button>
+              Top Rankings
+            </Link>
             
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                handleAdultContentClick('adult-list');
-              }}
-              className="flex items-center text-white font-semibold hover:text-red-300 transition-all duration-300 py-3 px-4 rounded-xl hover:bg-gradient-to-r hover:from-red-900/30 hover:to-pink-900/30 text-left"
-            >
-              <FaExclamationTriangle className="mr-3 text-red-400" />
-              Adult Movies
-            </button>
-            
-            {/* Mobile Movie Section */}
-            <div className="border-t border-slate-700/50 pt-4">
-              <h3 className="text-white font-bold mb-3 text-lg flex items-center">
-                <FaPlayCircle className="mr-2 text-yellow-400" />
-                Movies
-              </h3>
-              <div className="grid grid-cols-2 gap-3 pl-2">
-                {movieCategories.map((category) => (
-                  <Link 
-                    key={category.href}
-                    href={category.href} 
-                    className="text-gray-300 hover:text-white transition-all duration-300 py-2 px-3 rounded-lg hover:bg-white/10 text-sm flex items-center"
+            {/* Archives Mobile */}
+            <div className="border-t border-gray-700 pt-3">
+              <h3 className="text-white font-bold mb-2">Archives</h3>
+              <div className="grid grid-cols-3 gap-2 pl-2">
+                {recentYears.map(year => (
+                  <Link
+                    key={year}
+                    href={`/movie/year/${year}`}
+                    className="text-xs text-gray-300 hover:text-white transition-colors text-center py-1"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    {category.icon && <category.icon className="mr-2 text-yellow-400 text-xs" />}
-                    {category.label}
+                    {year}
                   </Link>
                 ))}
               </div>
-              
-              <div className="mt-4 pl-2">
-                <h4 className="text-gray-400 text-sm font-bold mb-2 flex items-center">
-                  <FaStar className="mr-1 text-blue-400" />
-                  Movie Genres
-                </h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {movieGenres.map((genre) => (
-                    <Link
-                      key={genre.id}
-                      href={`/movie/genre/${createSlug(genre.name)}`}
-                      className="text-xs text-gray-300 hover:text-white transition-all duration-300 py-1.5 px-2 rounded-md hover:bg-white/10"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {genre.name}
-                    </Link>
-                  ))}
+              <div className="grid grid-cols-2 gap-2 pl-2 mt-2">
+                {decades.map(decade => (
+                  <Link
+                    key={decade}
+                    href={`/movie/decade/${decade.toLowerCase()}`}
+                    className="text-xs text-gray-300 hover:text-white transition-colors text-center py-1"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {decade}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            
+            {/* Movies Mobile */}
+            <div className="border-t border-gray-700 pt-3">
+              <h3 className="text-white font-bold mb-2">Movies</h3>
+              <div className="flex flex-col space-y-2 pl-4">
+                <Link 
+                  href="/movie/popular" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Popular
+                </Link>
+                <Link 
+                  href="/movie/now_playing" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Now Playing
+                </Link>
+                <Link 
+                  href="/movie/upcoming" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Upcoming
+                </Link>
+                <Link 
+                  href="/movie/top_rated" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Top Rated
+                </Link>
+                
+                <div className="pt-2">
+                  <h4 className="text-gray-400 text-sm font-bold mb-1">Genres</h4>
+                  <div className="grid grid-cols-2 gap-2 pl-2">
+                    {movieGenres.map((genre) => (
+                      <Link
+                        key={genre.id}
+                        href={`/movie/genre/${createSlug(genre.name)}`}
+                        className="text-xs text-gray-300 hover:text-white transition-colors"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {genre.name}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
             
-            {/* Mobile TV Series Section */}
-            <div className="border-t border-slate-700/50 pt-4">
-              <h3 className="text-white font-bold mb-3 text-lg flex items-center">
-                <FaPlayCircle className="mr-2 text-purple-400" />
-                TV Series
-              </h3>
-              <div className="grid grid-cols-2 gap-3 pl-2">
-                {tvCategories.map((category) => (
-                  <Link 
-                    key={category.href}
-                    href={category.href} 
-                    className="text-gray-300 hover:text-white transition-all duration-300 py-2 px-3 rounded-lg hover:bg-white/10 text-sm flex items-center"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {category.icon && <category.icon className="mr-2 text-purple-400 text-xs" />}
-                    {category.label}
-                  </Link>
-                ))}
-              </div>
-              
-              <div className="mt-4 pl-2">
-                <h4 className="text-gray-400 text-sm font-bold mb-2 flex items-center">
-                  <FaStar className="mr-1 text-purple-400" />
-                  TV Genres
-                </h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {tvGenres.map((genre) => (
-                    <Link
-                      key={genre.id}
-                      href={`/tv-show/genre/${createSlug(genre.name)}`}
-                      className="text-xs text-gray-300 hover:text-white transition-all duration-300 py-1.5 px-2 rounded-md hover:bg-white/10"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {genre.name}
-                    </Link>
-                  ))}
+            {/* TV Series Mobile */}
+            <div className="border-t border-gray-700 pt-3">
+              <h3 className="text-white font-bold mb-2">TV Series</h3>
+              <div className="flex flex-col space-y-2 pl-4">
+                <Link 
+                  href="/tv-show/popular" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Popular
+                </Link>
+                <Link 
+                  href="/tv-show/airing_today" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Airing Today
+                </Link>
+                <Link 
+                  href="/tv-show/on_the_air" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  On The Air
+                </Link>
+                <Link 
+                  href="/tv-show/top_rated" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Top Rated
+                </Link>
+                
+                <div className="pt-2">
+                  <h4 className="text-gray-400 text-sm font-bold mb-1">Genres</h4>
+                  <div className="grid grid-cols-2 gap-2 pl-2">
+                    {tvGenres.map((genre) => (
+                      <Link
+                        key={genre.id}
+                        href={`/tv-show/genre/${createSlug(genre.name)}`}
+                        className="text-xs text-gray-300 hover:text-white transition-colors"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {genre.name}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -376,72 +386,35 @@ export default function Navbar() {
         </div>
       )}
       
-      {/* Modal Peringatan Konten Dewasa */}
-      {showAdultWarning && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-2xl max-w-md w-full border border-slate-700/50 shadow-2xl">
-            <div className="flex items-center mb-6 text-red-400">
-              <FaExclamationTriangle className="text-3xl mr-3" />
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
-                Adult Content Warning
-              </h3>
-            </div>
-            <p className="text-gray-300 mb-8 text-lg leading-relaxed">
-              This content is intended for viewers aged 18 and over only.
-              Are you sure you want to continue?
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setShowAdultWarning(false)}
-                className="px-6 py-3 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-all duration-300 font-semibold hover:scale-105"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmAdultContent}
-                className="px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl hover:from-red-700 hover:to-orange-700 transition-all duration-300 font-semibold hover:scale-105 shadow-lg"
-              >
-                Continue
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* CSS untuk efek tambahan */}
+      {/* CSS untuk efek rainbow */}
       <style jsx>{`
         .rainbow-text {
           font-size: 1.8rem;
           background-image: linear-gradient(
             to right,
-            #ff6b6b, #ffa726, #ffeb3b, #4cd964, 
-            #4fc3f7, #5d6df9, #ff6bc9
+            #ff0000, #ff8000, #ffff00, #80ff00, 
+            #00ff00, #00ff80, #00ffff, #0080ff, 
+            #0000ff, #8000ff, #ff00ff, #ff0080
           );
           -webkit-background-clip: text;
           background-clip: text;
           color: transparent;
           background-size: 300% 300%;
           animation: rainbow 4s ease infinite;
-          font-weight: 800;
-          text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         
-        .hover-glow:hover {
-          text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 3px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: linear-gradient(to bottom, #ff6b6b, #5d6df9);
-          border-radius: 3px;
+        .rainbow-hover:hover {
+          background-image: linear-gradient(
+            to right,
+            #ff0000, #ff8000, #ffff00, #80ff00, 
+            #00ff00, #00ff80, #00ffff, #0080ff, 
+            #0000ff, #8000ff, #ff00ff, #ff0080
+          );
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          background-size: 300% 300%;
+          animation: rainbow 2s ease infinite;
         }
         
         @keyframes rainbow {

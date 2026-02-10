@@ -39,8 +39,8 @@ export async function generateMetadata({ params }) {
   if (CATEGORIES.includes(slug)) {
     const title = slug.replace(/_/g, ' ').toUpperCase();
     return {
-      title: `Sflix - ${title} Movies`,
-      description: `Explore the ${title} movies collection on Sflix.`,
+      title: `SFlix - ${title} Movies`,
+      description: `Explore the ${title} movies collection on SFlix.`,
     };
   }
 
@@ -51,8 +51,8 @@ export async function generateMetadata({ params }) {
     const genres = await getMovieGenres();
     const genreName = genres.find(g => g.id == genreId)?.name || 'Unknown';
     return {
-      title: `Sflix - ${genreName} Movies`,
-      description: `Discover ${genreName} movies on Sflix.`,
+      title: `SFlix - ${genreName} Movies`,
+      description: `Discover ${genreName} movies on SFlix.`,
     };
   }
 
@@ -83,8 +83,8 @@ export async function generateMetadata({ params }) {
   // Jika data tidak ditemukan, kembalikan metadata dasar
   if (!movieData) {
     return {
-      title: 'Sflix',
-      description: 'Find your favorite movies to stream.',
+      title: 'SFlix',
+      description: 'Watch Movie Stream Movies and Tv Series Free.',
     };
   }
 
@@ -99,13 +99,13 @@ export async function generateMetadata({ params }) {
   const socialImageAlt = `${movieData.title} poster`;
 
   return {
-    title: `Sflix - ${movieData.title}`,
+    title: `SFlix - ${movieData.title}`,
     description: movieData.overview || `Detailed information for movie ${movieData.title}`,
     openGraph: {
       title: movieData.title,
       description: movieData.overview || `Detailed information for movie ${movieData.title}`,
-      url: `https://sflix-hd.vercel.app/movie/${slug}`,
-      siteName: 'Sflix',
+      url: `https://sflix-hd.netlify.app/movie/${slug}`,
+      siteName: 'SFlix',
       images: [
         {
           url: socialImage,
@@ -419,7 +419,7 @@ export default async function MoviePage({ params }) {
 		{/* Bottom Stream Button */}
         <div className="mt-12 text-center">
              <a href={`/movie/${slug}/stream`}>
-              <button className="bg-blue-700 hover:bg-green-700 text-white font-bold py-4 px-10 rounded-lg text-xl transition-transform transform hover:scale-105 shadow-lg">
+              <button className="bg-blue-700 hover:bg-green-800 text-white font-bold py-4 px-10 rounded-lg text-xl transition-transform transform hover:scale-105 shadow-lg">
                 🎬 Stream Now
               </button>
             </a>

@@ -2,7 +2,7 @@
 
 "use client";
 
-import { searchMoviesAndTv } from '../../lib/api.jsx';
+import { searchMoviesAndTv } from '../../lib/api.js';
 import MovieList from '../../components/MovieList.jsx';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
